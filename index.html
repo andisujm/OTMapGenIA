@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Open Tibia Map Generator">
+    <meta name="keywords" content="Open Tibia, OTBM, RME, Map Editor, OTMapGen">
+    <meta name="author" content="Forby">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/style.css">
+
+    <title>Open Tibia Map Generator</title>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="row">
+        <div class="col-md">
+          <div class="alert alert-primary">
+            <h3> <b> Open Tibia Map Generator</b> <small> version <b><span id="otmapgen-version"></span></b> </small> </h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md">
+
+          <div class="form-row text-center">
+            <div class="col-12">
+              <button id="generate-map" class="btn btn-primary" title="Generating an OTBM file may take some moments"><i class="fas fa-download"></i> Generate OTBM</button>
+              <button id="generate-minimap" class="btn btn-primary" title="Generate a preview minimap of the terrain"><i class="fas fa-paint-brush"></i> Generate Minimap</button>
+            </div>
+          </div>
+
+          <hr>
+          <div id="generation-status" class="alert alert-primary">
+            <b>Ok!</b> Minimap has been generated.
+          </div>
+          <hr>
+
+          <!-- Minimap container -->
+          <div id="minimap-wrapper">
+            <canvas class="img-responsive" id="minimap" width="512" height="512"></canvas>
+            <div id="minimap-overlay">
+              <div style="border: 2px solid white;" class="btn btn-sm btn-success" id="increment-layer" title="Go up one floor"><i class="fas fa-plus"></i></div>
+              <div style="border: 2px solid white;" class="btn btn-sm btn-success" id="decrement-layer" title="Go down one floor"><i class="fas fa-minus"></i></div>
+              <div style="border: 2px solid white;" class="btn btn-sm btn-success" id="transparent-layer" title="Toggle floor transparency"><i class="fas fa-eye"></i></div>
+            </div>
+          </div>
+          <div class="text-muted"> <small> This minimap shows the generated terrain only. </small> </div>
+
+          <hr>
+
+        </div>
+
+        <div class="col-md">
+
+          <h5> <i class="fas fa-map text-primary"></i> Map Settings </h5>
+
+            <p> General map settings and map seed for generation.
+
+            <!-- Map SEED -->
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Random Seed</div>
+              </div>
+              <input id="map-seed" type="text" class="form-control" placeholder="0" value="0" title="Integer used to SEED the random number generator">
+
+              <!-- Dice Button -->
+              <div id="random-seed" class="input-group-append" title="Generate a random minimap">
+                <div class="input-group-text btn text-primary"><i class="fas fa-dice"></i></div>
+              </div>
+
+            </div>
+
+            <!-- Map Width -->
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Width</div>
+              </div>
+              <input id="map-width" type="text" class="form-control" placeholder="512" value="512">
+            </div>
+
+            <!-- Map Height -->
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Height</div>
+              </div>
+              <input id="map-height" type="text" class="form-control" placeholder="512" value="512">
+            </div>
+
+            <!-- Map Version -->
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Version</div>
+              </div>
+              <select class="form-control" id="map-version" title="Map version of the generated OTBM">
+                <option>10.98</option>
+                <option>8.70</option>
+                <option>8.60</option>
+                <option>8.54</option>
+                <option>8.40</option>
+                <option>8.10</option>
+                <option>8.00</option>
+                <option>7.60</option>
+              </select>
+            </div>
+
+            <hr> <h5> <i class="fas fa-tree text-primary"></i> Biome Settings </h5>
+
+            <p> Settings that influence the type of terrain.
+
+            <!-- Add Sand Biome -->
+            <div class="form-check form-check-inline mb-2">
+              <input id="add-sand-biome" class="form-check-input" type="checkbox" checked>
+              <label class="form-check-label" for="add-sand-biome">
+                Sand Biome
+              </label>
+            </div>
+
+            <!-- Add Caves -->
+            <div class="form-check form-check-inline mb-2">
+              <input id="add-caves" class="form-check-input" type="checkbox">
+              <label class="form-check-label" for="add-caves">
+                Add Caves
+              </label>
+            </div>
+
+            <hr> <h5> <i class="fas fa-sliders-h text-primary"></i> Noise Frequencies </h5>
+            <p> Noise frequencies control the terrain elevation by stacking frequencies at given weights. Higher frequencies introduce a larger level of detail.
+
+            <!-- Lower Frequencies 1, 2, 4, 8 -->
+            <div class="form-row form-group">
+              <div class="input-group col-md-3">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>1</sub></div>
+                </div>
+                <input id="frequency-1" type="text" class="form-control" placeholder="0.30" value="0.30">
+              </div>
+              <div class="input-group col-md-3">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>2</sub></div>
+                </div>
+                <input id="frequency-2" type="text" class="form-control" placeholder="0.20" value="0.20">
+              </div>
+              <div class="input-group col-md-3">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>4</sub></div>
+                </div>
+                <input id="frequency-4" type="text" class="form-control" placeholder="0.20" value="0.20">
+              </div>
+              <div class="input-group col-md-3">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>8</sub></div>
+                </div>
+                <input id="frequency-8" type="text" class="form-control" placeholder="0.125" value="0.125">
+              </div>
+            </div>
+
+            <!-- High Frequencies 16, 32, 64 -->
+            <div class="form-row form-group">
+              <div class="input-group col-md-4">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>16</sub></div>
+                </div>
+                <input id="frequency-16" type="text" class="form-control" placeholder="0.10" value="0.10">
+              </div>
+              <div class="input-group col-md-4">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>32</sub></div>
+                </div>
+                <input id="frequency-32" type="text" class="form-control" placeholder="0.05" value="0.05">
+              </div>
+              <div class="input-group col-md-4">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">f<sub>64</sub></div>
+                </div>
+                <input id="frequency-64" type="text" class="form-control" placeholder="0.025" value="0.025">
+              </div>
+            </div>
+
+            <!-- Cave Options -->
+            <div id="cave-options">
+
+              <hr> <h5> <i class="fas fa-eye"></i> Cave Options </h5>
+
+              <div class="input-group mb-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Cave Depth</div>
+                </div>
+                <input id="cave-depth" type="text" class="form-control" placeholder="12" value="12">
+              </div>
+
+              <div class="input-group mb-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Cave Roughness</div>
+                </div>
+                <input id="cave-roughness" type="text" class="form-control" placeholder="0.45" value="0.45">
+              </div>
+
+              <div class="input-group mb-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Cave Chance</div>
+                </div>
+                <input id="cave-chance" type="text" class="form-control" placeholder="0.005" value="0.005">
+              </div>
+            </div>
+
+            <hr> <h5> <i class="fas fa-cog text-primary"></i> Generation Parameters </h5>
+
+            <p> Generation parameters are values that have an effect on detailed features of the generated map. Parameter sensitivity and response is unknown.
+
+            <!-- Euclidean Falloff -->
+            <div class="form-check form-check-inline mb-2">
+              <input id="euclidean-falloff" class="form-check-input" type="checkbox">
+              <label class="form-check-label" for="euclidean-falloff">
+                Euclidean Falloff
+              </label>
+            </div>
+
+            <!-- Water Level -->
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Water Level</div>
+              </div>
+              <select class="form-control" id="water-level" title="Height of level filled with water">
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+            </div>
+
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Parameter A</div>
+              </div>
+              <input id="parameter-a" type="text" class="form-control" placeholder="0.05" value="0.05">
+            </div>
+
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Parameter B</div>
+              </div>
+              <input id="parameter-b" type="text" class="form-control" placeholder="1.05" value="1.05">
+            </div>
+
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Parameter C</div>
+              </div>
+              <input id="parameter-c" type="text" class="form-control" placeholder="1.00" value="1.00">
+            </div>
+
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Linear Elevation</div>
+              </div>
+              <input id="parameter-d" type="text" class="form-control" placeholder="12.00" value="12.00">
+            </div>
+
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Exponential Elevation</div>
+              </div>
+              <input id="parameter-e" type="text" class="form-control" placeholder="1.00" value="1.00">
+            </div>
+
+          </div>
+        </div>
+
+        <hr>
+
+        <span class="text-muted">
+          <h6><small> Copyright by <i class="fab fa-github"></i> <a href="https://github.com/Inconcessus"><b>Forby</b></a>, 2018. All rights reserved. Licensed under <i class="fas fa-balance-scale"></i> <a href="https://opensource.org/licenses/MIT"><b>MIT</b></a>.</small></h6>
+        </span>
+
+      </div>
+
+    <script src="./js/bundle.js"></script>
+    <script src="./js/app.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+
+</html>
