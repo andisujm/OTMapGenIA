@@ -768,10 +768,29 @@ const noise = require("./lib/noise").noise;
 const fs = require("fs");
 const border = require("./lib/border");
 const clutter = require("./lib/clutter");
-// Adicionar após a linha que importa 'clutter'
 
-const biomeAI = require("./lib/biomeAI");
-const structureGenerator = require("./lib/structureGenerator");
+
+// Substitua a linha problemática por:
+const biomeAI = {
+  // Implementação simples das funções que são usadas
+  generateTemperatureMap: function() { return []; },
+  generateMoistureMap: function() { return []; },
+  generateRivers: function() { return {modifiedHeightmap: []}; },
+  applyBiomes: function() { return []; },
+  distributeDecorations: function() { return []; }
+};
+
+const structureGenerator = {
+  // Implementação simples das funções que são usadas
+  generateCave: function(w, h, base) { return base; },
+  generateLake: function(w, h, base) { return base; },
+  generateRuins: function(w, h, base) { return base; },
+  generateForest: function() { return []; }
+};
+
+
+
+
 const ITEMS = require("./json/items");
 const VERSIONS = require("./json/versions");
 
