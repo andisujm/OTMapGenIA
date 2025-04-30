@@ -1,5 +1,20 @@
-document.addEventListener("DOMContentLoaded", function(event) {
 
+
+
+// No início do seu app.js ou em um script de inicialização
+document.addEventListener("DOMContentLoaded", function() {
+  // Verificar se o bundle está carregado corretamente
+  if (typeof bundle === 'undefined' || !bundle.OTMapGenerator) {
+    console.error("Erro crítico: bundle.OTMapGenerator não está disponível!");
+    updateInformation("danger", "<b>Erro!</b> Não foi possível inicializar o gerador de mapas.");
+    return;
+  }
+  
+  console.log("bundle.OTMapGenerator carregado com sucesso:", bundle.OTMapGenerator);
+  console.log("Versão do OTMapGen:", bundle.__VERSION__);
+  
+  // Continuar inicialização
+});
   // Substituir a função getConfiguration
 
 function getConfiguration() {
@@ -237,31 +252,47 @@ function getConfiguration() {
   }
 
   function generateMinimap() {
+  updateInformation("info", "Criando um novo minimapa. Aguarde...");
   
-    /* function generateMinimap
-     * Asks OTMapGen for a minimap preview of the generation parameters
-     */
+  defer(function() {
+    var mapConfiguration = getConfiguration();
 
-    updateInformation("info", "Creating a new minimap. Sit tight!");
-  
-    // Defer and give thread to DOM
-    defer(function() {
-  
-      var mapConfiguration = getConfiguration();
-
-      // Attempt to generate a minimap
+    try {
+      console.log("Iniciando geração do minimapa com configuração:", JSON.stringify(mapConfiguration));
+      
+      // Isole cada etapa para identificar onde o erro ocorre
       try {
-        _layerData = bundle.OTMapGenerator.generateMinimap(mapConfiguration);
-      } catch(e) {
-        return updateInformation("danger", "<b>Failed!</b> Exception in generation of minimap.");
+        console.log("Passo 1: Preparando dados para geração");
+        // Código de preparação
+      } catch (e) {
+        console.error("Erro na preparação:", e);
+        throw e;
       }
-
-      updateInformation("success", "<b>Ok!</b> Minimap has been generated.");
+      
+      try {
+        console.log("Passo 2: Gerando terreno base");
+        // Código de geração de terreno
+      } catch (e) {
+        console.error("Erro na geração de terreno:", e);
+        throw e;
+      }
+      
+      try {
+        console.log("Passo 3: Gerando minimap final");
+        _layerData = bundle.OTMapGenerator.generateMinimap(mapConfiguration);
+      } catch (e) {
+        console.error("Erro específico na geração do minimapa:", e);
+        throw e;
+      }
+      
+      updateInformation("success", "<b>Ok!</b> Minimapa gerado com sucesso.");
       showLayer();
-  
-    });
-  
-  }
+    } catch (e) {
+      console.error("Erro completo:", e);
+      updateInformation("danger", "<b>Falha!</b> Exceção na geração do minimapa: " + e.message);
+    }
+  });
+}
   
   function downloadMap(content) {
   
@@ -291,4 +322,4 @@ function getConfiguration() {
   // Generate an initial minimap
   generateMinimap();
 
-});
+
