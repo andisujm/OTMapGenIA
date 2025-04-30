@@ -770,8 +770,8 @@ const border = require("./lib/border");
 const clutter = require("./lib/clutter");
 // Adicionar após a linha que importa 'clutter'
 
-const biomeAI = require("/var/www/html/OTMapGenIA/js/lib/biomeAI");
-const structureGenerator = require("/var/www/html/OTMapGenIA/js/lib/structureGenerator");
+const biomeAI = require("./lib/biomeAI");
+const structureGenerator = require("./lib/structureGenerator");
 const ITEMS = require("./json/items");
 const VERSIONS = require("./json/versions");
 
