@@ -1,44 +1,50 @@
 document.addEventListener("DOMContentLoaded", function(event) {
 
-  function getConfiguration() {
-  
-    /* function getConfiguration
-     * Returns default or DOM overwritten parameters
-     */
+  // Substituir a função getConfiguration
 
-    return {
-      "SEED": Number(document.getElementById("map-seed").value) || 0,
-      "WIDTH": Number(document.getElementById("map-width").value) || 512,
-      "HEIGHT": Number(document.getElementById("map-height").value) || 512,
-      "VERSION": document.getElementById("map-version").value,
-      "TERRAIN_ONLY": false,
-      "GENERATION": {
-        "A": Number(document.getElementById("parameter-a").value) || 0.05,
-        "B": Number(document.getElementById("parameter-b").value) || 2.00,
-        "C": Number(document.getElementById("parameter-c").value) || 2.00,
-        "CAVE_DEPTH": Number(document.getElementById("cave-depth").value) || 12,
-        "CAVE_ROUGHNESS": Number(document.getElementById("cave-roughness").value) || 0.45,
-        "CAVE_CHANCE": Number(document.getElementById("cave-chance").value) || 0.005,
-        "SAND_BIOME": Boolean(document.getElementById("add-sand-biome").checked),
-        "EUCLIDEAN": Boolean(document.getElementById("euclidean-falloff").checked),
-        "SMOOTH_COASTLINE": true,
-        "ADD_CAVES": Boolean(document.getElementById("add-caves").checked),
-        "WATER_LEVEL": Number(document.getElementById("water-level").value) || 0,
-        "EXPONENT": Number(document.getElementById("parameter-e").value) || 1.00,
-        "LINEAR": Number(document.getElementById("parameter-d").value) || 8.0,
-        "FREQUENCIES": [
-          {"f": 1, "weight": Number(document.getElementById("frequency-1").value)},
-          {"f": 2, "weight": Number(document.getElementById("frequency-2").value)},
-          {"f": 4, "weight": Number(document.getElementById("frequency-4").value)},
-          {"f": 8, "weight": Number(document.getElementById("frequency-8").value)},
-          {"f": 16, "weight": Number(document.getElementById("frequency-16").value)},
-          {"f": 32, "weight": Number(document.getElementById("frequency-32").value)},
-          {"f": 64, "weight": Number(document.getElementById("frequency-64").value)}
-        ]
-      }
-    }
+function getConfiguration() {
   
+  /* function getConfiguration
+   * Returns default or DOM overwritten parameters
+   */
+
+  return {
+    "SEED": Number(document.getElementById("map-seed").value) || 0,
+    "WIDTH": Number(document.getElementById("map-width").value) || 512,
+    "HEIGHT": Number(document.getElementById("map-height").value) || 512,
+    "VERSION": document.getElementById("map-version").value,
+    "TERRAIN_ONLY": false,
+    "GENERATION": {
+      "A": Number(document.getElementById("parameter-a").value) || 0.05,
+      "B": Number(document.getElementById("parameter-b").value) || 2.00,
+      "C": Number(document.getElementById("parameter-c").value) || 2.00,
+      "CAVE_DEPTH": Number(document.getElementById("cave-depth").value) || 12,
+      "CAVE_ROUGHNESS": Number(document.getElementById("cave-roughness").value) || 0.45,
+      "CAVE_CHANCE": Number(document.getElementById("cave-chance").value) || 0.005,
+      "SAND_BIOME": Boolean(document.getElementById("add-sand-biome").checked),
+      "EUCLIDEAN": Boolean(document.getElementById("euclidean-falloff").checked),
+      "SMOOTH_COASTLINE": true,
+      "ADD_CAVES": Boolean(document.getElementById("add-caves").checked),
+      "ADD_RIVERS": Boolean(document.getElementById("add-rivers")?.checked || false),
+      "ADD_LAKES": Boolean(document.getElementById("add-lakes")?.checked || true),
+      "ADD_RUINS": Boolean(document.getElementById("add-ruins")?.checked || false),
+      "ADD_FORESTS": Boolean(document.getElementById("add-forests")?.checked || true),
+      "WATER_LEVEL": Number(document.getElementById("water-level").value) || 0,
+      "EXPONENT": Number(document.getElementById("parameter-e").value) || 1.00,
+      "LINEAR": Number(document.getElementById("parameter-d").value) || 8.0,
+      "FREQUENCIES": [
+        {"f": 1, "weight": Number(document.getElementById("frequency-1").value)},
+        {"f": 2, "weight": Number(document.getElementById("frequency-2").value)},
+        {"f": 4, "weight": Number(document.getElementById("frequency-4").value)},
+        {"f": 8, "weight": Number(document.getElementById("frequency-8").value)},
+        {"f": 16, "weight": Number(document.getElementById("frequency-16").value)},
+        {"f": 32, "weight": Number(document.getElementById("frequency-32").value)},
+        {"f": 64, "weight": Number(document.getElementById("frequency-64").value)}
+      ]
+    }
   }
+
+}
 
   _transparent = false;
 
