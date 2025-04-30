@@ -3,7 +3,7 @@
  * Inspirado por técnicas de Minecraft e outros geradores procedurais
  */
 
-const ITEMS = require("../json/items");
+
 
 // Sistema de classificação de biomas usando Voronoi e ruído de Perlin
 function BiomeAI() {
@@ -377,4 +377,17 @@ BiomeAI.prototype.distributeDecorations = function(width, height, biomeMap, clut
     return decorations;
 };
 
-module.exports = new BiomeAI();
+// biomeAI.js
+window.OTMapGenIA = window.OTMapGenIA || {};
+
+OTMapGenIA.BiomeAI = (function() {
+    // Todo o código de biomeAI.js aqui, sem require
+    
+    // Funções públicas
+    return {
+        generateBiomes: function() { /* ... */ },
+        applyBiomeRules: function() { /* ... */ }
+    };
+})();
+
+// Remover a linha: module.exports = ...

@@ -3,7 +3,8 @@
  * Usando sistemas baseados em IA para criar estruturas mais naturais e interessantes
  */
 
-const ITEMS = require("../json/items");
+
+
 
 function StructureGenerator() {
     this.templateStructures = {
@@ -571,4 +572,17 @@ StructureGenerator.prototype.generateLake = function(width, height, baseLayer, c
     return resultMap;
 };
 
-module.exports = new StructureGenerator();
+// structureGenerator.js
+window.OTMapGenIA = window.OTMapGenIA || {};
+
+OTMapGenIA.StructureGenerator = (function() {
+    // Todo o código de structureGenerator.js aqui, sem require
+    
+    // Funções públicas
+    return {
+        generateStructures: function() { /* ... */ },
+        placeStructures: function() { /* ... */ }
+    };
+})();
+
+// Remover a linha: module.exports = ...
