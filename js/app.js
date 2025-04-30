@@ -1,65 +1,44 @@
+document.addEventListener("DOMContentLoaded", function(event) {
 
-
-
-// No início do seu app.js ou em um script de inicialização
-document.addEventListener("DOMContentLoaded", function() {
-  // Verificar se o bundle está carregado corretamente
-  if (typeof bundle === 'undefined' || !bundle.OTMapGenerator) {
-    console.error("Erro crítico: bundle.OTMapGenerator não está disponível!");
-    updateInformation("danger", "<b>Erro!</b> Não foi possível inicializar o gerador de mapas.");
-    return;
-  }
+  function getConfiguration() {
   
-  console.log("bundle.OTMapGenerator carregado com sucesso:", bundle.OTMapGenerator);
-  console.log("Versão do OTMapGen:", bundle.__VERSION__);
-  
-  // Continuar inicialização
-});
-  // Substituir a função getConfiguration
+    /* function getConfiguration
+     * Returns default or DOM overwritten parameters
+     */
 
-function getConfiguration() {
-  
-  /* function getConfiguration
-   * Returns default or DOM overwritten parameters
-   */
-
-  return {
-    "SEED": Number(document.getElementById("map-seed").value) || 0,
-    "WIDTH": Number(document.getElementById("map-width").value) || 512,
-    "HEIGHT": Number(document.getElementById("map-height").value) || 512,
-    "VERSION": document.getElementById("map-version").value,
-    "TERRAIN_ONLY": false,
-    "GENERATION": {
-      "A": Number(document.getElementById("parameter-a").value) || 0.05,
-      "B": Number(document.getElementById("parameter-b").value) || 2.00,
-      "C": Number(document.getElementById("parameter-c").value) || 2.00,
-      "CAVE_DEPTH": Number(document.getElementById("cave-depth").value) || 12,
-      "CAVE_ROUGHNESS": Number(document.getElementById("cave-roughness").value) || 0.45,
-      "CAVE_CHANCE": Number(document.getElementById("cave-chance").value) || 0.005,
-      "SAND_BIOME": Boolean(document.getElementById("add-sand-biome").checked),
-      "EUCLIDEAN": Boolean(document.getElementById("euclidean-falloff").checked),
-      "SMOOTH_COASTLINE": true,
-      "ADD_CAVES": Boolean(document.getElementById("add-caves").checked),
-      "ADD_RIVERS": Boolean(document.getElementById("add-rivers")?.checked || false),
-      "ADD_LAKES": Boolean(document.getElementById("add-lakes")?.checked || true),
-      "ADD_RUINS": Boolean(document.getElementById("add-ruins")?.checked || false),
-      "ADD_FORESTS": Boolean(document.getElementById("add-forests")?.checked || true),
-      "WATER_LEVEL": Number(document.getElementById("water-level").value) || 0,
-      "EXPONENT": Number(document.getElementById("parameter-e").value) || 1.00,
-      "LINEAR": Number(document.getElementById("parameter-d").value) || 8.0,
-      "FREQUENCIES": [
-        {"f": 1, "weight": Number(document.getElementById("frequency-1").value)},
-        {"f": 2, "weight": Number(document.getElementById("frequency-2").value)},
-        {"f": 4, "weight": Number(document.getElementById("frequency-4").value)},
-        {"f": 8, "weight": Number(document.getElementById("frequency-8").value)},
-        {"f": 16, "weight": Number(document.getElementById("frequency-16").value)},
-        {"f": 32, "weight": Number(document.getElementById("frequency-32").value)},
-        {"f": 64, "weight": Number(document.getElementById("frequency-64").value)}
-      ]
+    return {
+      "SEED": Number(document.getElementById("map-seed").value) || 0,
+      "WIDTH": Number(document.getElementById("map-width").value) || 512,
+      "HEIGHT": Number(document.getElementById("map-height").value) || 512,
+      "VERSION": document.getElementById("map-version").value,
+      "TERRAIN_ONLY": false,
+      "GENERATION": {
+        "A": Number(document.getElementById("parameter-a").value) || 0.05,
+        "B": Number(document.getElementById("parameter-b").value) || 2.00,
+        "C": Number(document.getElementById("parameter-c").value) || 2.00,
+        "CAVE_DEPTH": Number(document.getElementById("cave-depth").value) || 12,
+        "CAVE_ROUGHNESS": Number(document.getElementById("cave-roughness").value) || 0.45,
+        "CAVE_CHANCE": Number(document.getElementById("cave-chance").value) || 0.005,
+        "SAND_BIOME": Boolean(document.getElementById("add-sand-biome").checked),
+        "EUCLIDEAN": Boolean(document.getElementById("euclidean-falloff").checked),
+        "SMOOTH_COASTLINE": true,
+        "ADD_CAVES": Boolean(document.getElementById("add-caves").checked),
+        "WATER_LEVEL": Number(document.getElementById("water-level").value) || 0,
+        "EXPONENT": Number(document.getElementById("parameter-e").value) || 1.00,
+        "LINEAR": Number(document.getElementById("parameter-d").value) || 8.0,
+        "FREQUENCIES": [
+          {"f": 1, "weight": Number(document.getElementById("frequency-1").value)},
+          {"f": 2, "weight": Number(document.getElementById("frequency-2").value)},
+          {"f": 4, "weight": Number(document.getElementById("frequency-4").value)},
+          {"f": 8, "weight": Number(document.getElementById("frequency-8").value)},
+          {"f": 16, "weight": Number(document.getElementById("frequency-16").value)},
+          {"f": 32, "weight": Number(document.getElementById("frequency-32").value)},
+          {"f": 64, "weight": Number(document.getElementById("frequency-64").value)}
+        ]
+      }
     }
+  
   }
-
-}
 
   _transparent = false;
 
@@ -251,114 +230,32 @@ function getConfiguration() {
 
   }
 
-function generateMinimap() {
-  updateInformation("info", "Criando um novo minimapa. Aguarde...");
+  function generateMinimap() {
   
-  defer(function() {
-    var mapConfiguration = getConfiguration();
-    
-    try {
-      console.log("Iniciando geração do minimapa com configuração:", JSON.stringify(mapConfiguration));
-      
-      // Backup dos recursos avançados
-      var hasAdvancedFeatures = 
-        mapConfiguration.GENERATION.ADD_LAKES || 
-        mapConfiguration.GENERATION.ADD_RIVERS ||
-        mapConfiguration.GENERATION.ADD_FORESTS || 
-        mapConfiguration.GENERATION.ADD_RUINS;
-        
-      if (hasAdvancedFeatures) {
-        console.log("Detectados recursos avançados de bioma");
-      }
-      
+    /* function generateMinimap
+     * Asks OTMapGen for a minimap preview of the generation parameters
+     */
+
+    updateInformation("info", "Creating a new minimap. Sit tight!");
+  
+    // Defer and give thread to DOM
+    defer(function() {
+  
+      var mapConfiguration = getConfiguration();
+
+      // Attempt to generate a minimap
       try {
         _layerData = bundle.OTMapGenerator.generateMinimap(mapConfiguration);
-      } catch (e) {
-        console.error("Erro específico na geração do minimapa:", e);
-        
-        // Simplificar para tentar novamente sem recursos avançados
-        if (hasAdvancedFeatures) {
-          console.log("Tentando novamente sem recursos avançados...");
-          
-          // Fazer backup das configurações originais
-          var originalConfig = JSON.parse(JSON.stringify(mapConfiguration));
-          
-          // Desabilitar recursos avançados para uma geração mais simples
-          mapConfiguration.GENERATION.ADD_LAKES = false;
-          mapConfiguration.GENERATION.ADD_RIVERS = false;
-          mapConfiguration.GENERATION.ADD_FORESTS = false;
-          mapConfiguration.GENERATION.ADD_RUINS = false;
-          
-          try {
-            // Tentar novamente com configuração mais simples
-            _layerData = bundle.OTMapGenerator.generateMinimap(mapConfiguration);
-            
-            // Restaurar configuração original
-            mapConfiguration = originalConfig;
-          } catch (e2) {
-            console.error("Erro mesmo com configuração simplificada:", e2);
-            throw e2;
-          }
-        } else {
-          throw e;
-        }
+      } catch(e) {
+        return updateInformation("danger", "<b>Failed!</b> Exception in generation of minimap.");
       }
-      
-      updateInformation("success", "<b>Ok!</b> Minimapa gerado com sucesso.");
-      showLayer();
-    } catch (e) {
-      console.error("Erro completo:", e);
-      updateInformation("danger", "<b>Falha!</b> Exceção na geração do minimapa: " + e.message);
-      
-      // Fallback para um minimapa muito básico em caso de falha total
-      _layerData = createBasicMinimap();
-      showLayer();
-    }
-  });
-}
 
-// Função de fallback para criar um minimapa extremamente básico
-function createBasicMinimap() {
-  var width = Number(document.getElementById("map-width").value) || 512;
-  var height = Number(document.getElementById("map-height").value) || 512;
-  var seed = Number(document.getElementById("map-seed").value) || 0;
+      updateInformation("success", "<b>Ok!</b> Minimap has been generated.");
+      showLayer();
   
-  // Criar um minimapa básico
-  var layers = [];
-  for (var i = 0; i < 8; i++) {
-    layers.push(new Uint8ClampedArray(width * height * 4).fill(0));
-    
-    // Preencher a camada com alguns dados aleatórios mas determinísticos
-    var fillValue = (i === 0) ? 255 : 0; // Primeira camada visível, outras transparentes
-    
-    for (var j = 0; j < width * height; j++) {
-      if (i === 0) {
-        // Baseado em coordenadas para ser determinístico
-        var x = j % width;
-        var y = Math.floor(j / width);
-        
-        // Valor simples baseado em coordenadas e seed
-        var val = Math.sin(x/32 + seed/1000) * Math.cos(y/32 + seed/1000) * 128 + 128;
-        
-        // Definir RGBA
-        layers[i][j*4] = Math.round(val);        // R
-        layers[i][j*4+1] = Math.round(val * 0.8); // G
-        layers[i][j*4+2] = Math.round(val * 0.5); // B
-        layers[i][j*4+3] = 255;                   // A
-      }
-    }
+    });
+  
   }
-  
-  return {
-    data: layers,
-    metadata: {
-      WIDTH: width,
-      HEIGHT: height,
-      SEED: seed,
-      VERSION: document.getElementById("map-version").value
-    }
-  };
-}
   
   function downloadMap(content) {
   
@@ -388,4 +285,4 @@ function createBasicMinimap() {
   // Generate an initial minimap
   generateMinimap();
 
-
+});

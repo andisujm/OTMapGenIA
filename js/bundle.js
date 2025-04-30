@@ -768,29 +768,6 @@ const noise = require("./lib/noise").noise;
 const fs = require("fs");
 const border = require("./lib/border");
 const clutter = require("./lib/clutter");
-
-
-// Substitua a linha problemática por:
-const biomeAI = {
-  // Implementação simples das funções que são usadas
-  generateTemperatureMap: function() { return []; },
-  generateMoistureMap: function() { return []; },
-  generateRivers: function() { return {modifiedHeightmap: []}; },
-  applyBiomes: function() { return []; },
-  distributeDecorations: function() { return []; }
-};
-
-const structureGenerator = {
-  // Implementação simples das funções que são usadas
-  generateCave: function(w, h, base) { return base; },
-  generateLake: function(w, h, base) { return base; },
-  generateRuins: function(w, h, base) { return base; },
-  generateForest: function() { return []; }
-};
-
-
-
-
 const ITEMS = require("./json/items");
 const VERSIONS = require("./json/versions");
 
@@ -1020,22 +997,24 @@ OTMapGenerator.prototype.setMapHeader = function(data) {
 
 }
 
-// Substituir o método OTMapGenerator.prototype.generateMapLayers
-
 OTMapGenerator.prototype.generateMapLayers = function() {
 
   /* FUNCTION generateMapLayers
    * Generates temporary layer with noise seeded tiles
    * Layers are later converted to area tiles for OTBM2JSON
-   * Now with improved AI-based biome and structure generation
    */
 
   function createLayer() {
+  
     /* FUNCTION createLayer
      * Creates an empty layer of map size (WIDTH x HEIGHT)
      */
+  
     return new Array(this.CONFIGURATION.WIDTH * this.CONFIGURATION.HEIGHT).fill(0);
+  
   }
+
+  var z, id;
 
   // Seed the noise function
   noise.seed(this.CONFIGURATION.SEED);
@@ -1043,209 +1022,37 @@ OTMapGenerator.prototype.generateMapLayers = function() {
   // Create 8 zero filled layers
   var layers = new Array(8).fill(0).map(createLayer.bind(this));
 
-  console.log("Generating heightmap and base terrain...");
-  
-  // Gerar o mapa de altura principal
-  const heightMap = new Array(this.CONFIGURATION.WIDTH * this.CONFIGURATION.HEIGHT);
-  
-  // Gerar o heightmap base com nosso sistema de ruído existente
-  for (var y = 0; y < this.CONFIGURATION.HEIGHT; y++) {
-    for (var x = 0; x < this.CONFIGURATION.WIDTH; x++) {
-      // Get the elevation using our existing noise function
-      heightMap[y * this.CONFIGURATION.WIDTH + x] = this.zNoiseFunction(x, y) / 8; // Normalizado entre -1 e 1 aproximadamente
-    }
-  }
-  
-  // Gerar mapas de temperatura e umidade para biomas mais realistas
-  console.log("Generating temperature and moisture maps for biomes...");
-  const temperatureMap = biomeAI.generateTemperatureMap(
-    this.CONFIGURATION.WIDTH, 
-    this.CONFIGURATION.HEIGHT, 
-    heightMap
-  );
-  
-  const moistureMap = biomeAI.generateMoistureMap(
-    this.CONFIGURATION.WIDTH, 
-    this.CONFIGURATION.HEIGHT, 
-    heightMap,
-    noise
-  );
-  
-  // Gerar rios se habilitado
-  if (this.CONFIGURATION.GENERATION.ADD_RIVERS) {
-    console.log("Generating rivers...");
-    const riverData = biomeAI.generateRivers(
-      heightMap, 
-      this.CONFIGURATION.WIDTH, 
-      this.CONFIGURATION.HEIGHT, 
-      this.CONFIGURATION.SEED
-    );
-    
-    // Atualizar o heightmap com os rios
-    for (let i = 0; i < heightMap.length; i++) {
-      heightMap[i] = riverData.modifiedHeightmap[i];
-    }
-  }
-  
-  // Aplicar biomas aos tiles usando o sistema de IA
-  console.log("Applying biomes based on environmental factors...");
-  const biomeMap = biomeAI.applyBiomes(
-    this.CONFIGURATION.WIDTH, 
-    this.CONFIGURATION.HEIGHT, 
-    heightMap, 
-    temperatureMap, 
-    moistureMap,
-    this.CONFIGURATION.SEED
-  );
-  
-  // Converter o mapa de bioma para os tiles específicos
-  for (var y = 0; y < this.CONFIGURATION.HEIGHT; y++) {
-    for (var x = 0; x < this.CONFIGURATION.WIDTH; x++) {
-      const i = y * this.CONFIGURATION.WIDTH + x;
-      const biome = biomeMap[i];
-      
-      // Converter do mapa de bioma para o formato de tiles do jogo
-      const tileID = biome.tileID;
-      
-      // Determinar a elevação para o z-index
-      let z = Math.round((heightMap[i] + 1) * 3); // Convertendo de [-1,1] para [0,6]
-      
-      // Garantir que z esteja dentro dos limites
+  // Loop over the requested map width and height
+  for(var y = 0; y < this.CONFIGURATION.HEIGHT; y++) {
+    for(var x = 0; x < this.CONFIGURATION.WIDTH; x++) {
+
+      // Get the elevation
+      z = this.zNoiseFunction(x, y);
+      b = this.CONFIGURATION.GENERATION.SAND_BIOME ? 5 * this.zNoiseFunction(y, x) : 0;
+
+      id = this.mapElevation(z, b);
+
+      // Clamp the value
       z = Math.max(Math.min(z, 7), 0);
-      
-      // Preencher a coluna com tiles
-      this.fillColumn(layers, x, y, z, tileID);
-    }
-  }
-  
-  // Aplicar algoritmos avançados de terreno
-  if (this.CONFIGURATION.GENERATION.SMOOTH_COASTLINE) {
-    console.log("Smoothing coastline...");
-    layers = this.smoothCoastline(layers);
-  }
-  
-  // Gerar cavernas avançadas se habilitado
-  if (this.CONFIGURATION.GENERATION.ADD_CAVES) {
-    console.log("Generating cave systems using AI algorithms...");
-    const caveConfig = {
-      frequency: this.CONFIGURATION.GENERATION.CAVE_ROUGHNESS,
-      iterations: 4
-    };
-    
-    // Substituir o método de cavernas padrão pelo nosso gerador avançado
-    for (let z = 0; z < 3; z++) { // Limitar cavernas aos primeiros 3 níveis
-      layers[z] = structureGenerator.generateCave(
-        this.CONFIGURATION.WIDTH,
-        this.CONFIGURATION.HEIGHT,
-        layers[z],
-        caveConfig,
-        noise
-      );
-    }
-  }
-  
-  // Gerar lagos naturais
-  if (this.CONFIGURATION.GENERATION.ADD_LAKES !== false) {
-    console.log("Generating natural lakes...");
-    const lakeConfig = {
-      count: Math.floor(Math.sqrt(this.CONFIGURATION.WIDTH * this.CONFIGURATION.HEIGHT) / 32)
-    };
-    
-    layers[7] = structureGenerator.generateLake(
-      this.CONFIGURATION.WIDTH,
-      this.CONFIGURATION.HEIGHT,
-      layers[7],
-      lakeConfig
-    );
-  }
-  
-  // Gerar ruínas antigas se habilitado
-  if (this.CONFIGURATION.GENERATION.ADD_RUINS) {
-    console.log("Generating ancient ruins...");
-    const ruinsConfig = {
-      count: Math.floor(Math.sqrt(this.CONFIGURATION.WIDTH * this.CONFIGURATION.HEIGHT) / 64)
-    };
-    
-    layers[7] = structureGenerator.generateRuins(
-      this.CONFIGURATION.WIDTH,
-      this.CONFIGURATION.HEIGHT,
-      layers[7],
-      ruinsConfig
-    );
-  }
-  
-  // Distribuir decorações baseadas nos biomas
-  if (!this.CONFIGURATION.TERRAIN_ONLY) {
-    console.log("Distributing decorations based on biomes...");
-    const decorations = biomeAI.distributeDecorations(
-      this.CONFIGURATION.WIDTH, 
-      this.CONFIGURATION.HEIGHT, 
-      biomeMap, 
-      clutter, 
-      this.CONFIGURATION.SEED
-    );
-    
-    // Aplicar decorações à camada superior
-    for (let i = 0; i < decorations.length; i++) {
-      if (decorations[i] !== null) {
-        // Obtém as coordenadas x, y do índice
-        const x = i % this.CONFIGURATION.WIDTH;
-        const y = Math.floor(i / this.CONFIGURATION.WIDTH);
-        
-        // Encontra em qual camada (z) está o tile superior
-        let z = 7;
-        while (z >= 0 && layers[z][i] === 0) {
-          z--;
-        }
-        
-        if (z >= 0) {
-          // Adiciona a decoração ao índice apropriado na camada
-          const decorationLayer = z + 1 <= 7 ? z + 1 : z;
-          layers[decorationLayer][i] = decorations[i];
-        }
-      }
-    }
-  }
-  
-  // Adicionar floresta densa se habilitado
-  if (this.CONFIGURATION.GENERATION.ADD_FORESTS) {
-    console.log("Generating dense forests...");
-    const forestConfig = {
-      density: 0.7
-    };
-    
-    const forestMap = structureGenerator.generateForest(
-      this.CONFIGURATION.WIDTH,
-      this.CONFIGURATION.HEIGHT,
-      layers[7],
-      clutter,
-      forestConfig
-    );
-    
-    // Aplicar floresta à camada superior
-    for (let i = 0; i < forestMap.length; i++) {
-      if (forestMap[i] !== null) {
-        // Obtém as coordenadas x, y do índice
-        const x = i % this.CONFIGURATION.WIDTH;
-        const y = Math.floor(i / this.CONFIGURATION.WIDTH);
-        
-        // Encontra em qual camada (z) está o tile superior
-        let z = 7;
-        while (z >= 0 && layers[z][i] === 0) {
-          z--;
-        }
-        
-        if (z >= 0) {
-          // Adiciona a árvore na camada superior
-          const treeLayer = z + 1 <= 7 ? z + 1 : z;
-          layers[treeLayer][i] = forestMap[i];
-        }
-      }
+
+      // Fill the column with tiles
+      this.fillColumn(layers, x, y, z, id);
+
     }
   }
 
+  // Option to smooth coast line
+  if(this.CONFIGURATION.GENERATION.SMOOTH_COASTLINE) {
+    layers = this.smoothCoastline(layers);
+  }
+
+  if(this.CONFIGURATION.GENERATION.ADD_CAVES) {
+    layers = this.digCaves(layers);
+  }
+
   return layers;
-};
+
+}
 
 OTMapGenerator.prototype.smoothCoastline = function(layers) {
 
